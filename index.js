@@ -1,14 +1,14 @@
 require("dotenv").config();
 const bodyParser = require("body-parser");
 const express = require("express");
-const app = express();
-const port = 3000;
-const User = require("./models/userModel");
-//Import the mongoose module
 var mongoose = require("mongoose");
 
-//Set up default mongoose connection
-var mongoDB = process.env.MONGO_CONNECTION_STRING;
+const userRoutes = require("./routes/userRouter");
+
+const app = express();
+const port = 3000;
+
+const mongoDB = process.env.MONGO_CONNECTION_STRING;
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 
 //Get the default connection
@@ -24,22 +24,7 @@ app.use(
 );
 
 app.use(bodyParser.json());
-
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
-
-app.post("/users", (req, res) => {
-  const user = new User();
-  user.email = req.body.email;
-  user.password_hash = req.body.password_hash;
-  user.save((error) => {
-    if (error) {
-      console.log(error);
-    }
-    res.json({ user });
-  });
-});
+app.use("/api", userRoutes);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
