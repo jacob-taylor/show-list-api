@@ -8,14 +8,22 @@ const jwtSecret = process.env.JWT_SECRET;
 
 exports.index = async (req, res) => {
   const { token } = req.body;
-  const data = jwt.verify(token, jwtSecret);
+  try {
+    const data = jwt.verify(token, jwtSecret);
 
-  const user = await User.findOne({ email: data.email });
+    const user = await User.findOne({ email: data.email });
 
-  delete user.password_hash;
-  delete user.__v;
+    delete user.password_hash;
+    delete user.__v;
 
-  res.json({ user });
+    res.json({ user });
+  } catch (error) {
+    if (error.name === "JsonWebTokenError") {
+      res.status(401); // 401 is unathorized and should log the user out on the client
+    } else {
+      res.status(400).send({ error });
+    }
+  }
 };
 
 exports.new = async (req, res) => {
@@ -55,10 +63,10 @@ exports.login = async (req, res) => {
     // https://mongoosejs.com/docs/tutorials/lean.html
     const user = await User.findOne({ email }).lean();
     if (!user) {
-      return res.status(404).send({ message: "The username does not exist" });
+      return res.status(400).send({ error: "The email does not exist" });
     }
     if (!bcrypt.compareSync(password, user.password_hash)) {
-      return res.status(401).send({ message: "The password is invalid" });
+      return res.status(400).send({ error: "The password is invalid" });
     }
     const token = jwt.sign(
       {
