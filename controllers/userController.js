@@ -23,7 +23,7 @@ exports.new = async (req, res) => {
   const { email, password } = req.body;
 
   user.email = email;
-  user.password_hash = await bcrypt.hash(password, 14);
+  user.password_hash = await bcrypt.hash(password, 10);
 
   try {
     const newUser = await user.save();
