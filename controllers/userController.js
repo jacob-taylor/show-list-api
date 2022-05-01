@@ -12,6 +12,9 @@ exports.index = async (req, res) => {
 
   const user = await User.findOne({ email: data.email });
 
+  delete user.password_hash;
+  delete user.__v;
+
   res.json({ user });
 };
 
@@ -32,6 +35,10 @@ exports.new = async (req, res) => {
       },
       jwtSecret
     );
+
+    delete newUser.password_hash;
+    delete newUser.__v;
+
     return res.json({ token, user: newUser });
   } catch (error) {
     console.log("Error creating user", error);
@@ -48,7 +55,7 @@ exports.login = async (req, res) => {
     // https://mongoosejs.com/docs/tutorials/lean.html
     const user = await User.findOne({ email }).lean();
     if (!user) {
-      return res.status(401).send({ message: "The username does not exist" });
+      return res.status(404).send({ message: "The username does not exist" });
     }
     if (!bcrypt.compareSync(password, user.password_hash)) {
       return res.status(401).send({ message: "The password is invalid" });
@@ -61,6 +68,10 @@ exports.login = async (req, res) => {
       },
       jwtSecret
     );
+
+    delete user.password_hash;
+    delete user.__v;
+
     return res.json({ token, user });
   } catch (error) {
     return res.status(500).send({ message: error });
