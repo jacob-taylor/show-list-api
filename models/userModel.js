@@ -22,8 +22,6 @@ const userModel = mongoose.Schema({
   streaming_services: [
     { provider_id: Number, logo_path: String, provider_name: String },
   ],
-  // TODO: Add reminders
-  // reminders:
 });
 
 var User = (module.exports = mongoose.model("user", userModel));
