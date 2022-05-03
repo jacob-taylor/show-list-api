@@ -85,3 +85,32 @@ exports.login = async (req, res) => {
     return res.status(500).send({ message: error });
   }
 };
+
+exports.addShow = async (req, res) => {
+  //Find the user by the token the add a show to the user's show list, then return back the whole user
+  const { token, show } = req.body;
+  console.log(req.body);
+
+  if (!show) {
+    return res.status(400);
+  }
+  try {
+    const data = jwt.verify(token, jwtSecret);
+    console.log(data);
+
+    const user = await User.findOne({ email: data.email });
+    console.log(user);
+
+    user.show_list.push(show);
+    const updatedUser = await user.save();
+
+    console.log("User updated!");
+    res.status(200);
+  } catch (error) {
+    if (error.name === "JsonWebTokenError") {
+      res.status(401); // 401 is unathorized and should log the user out on the client
+    } else {
+      res.status(400).send({ error });
+    }
+  }
+};
