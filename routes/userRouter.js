@@ -5,7 +5,11 @@ const userController = require("../controllers/userController");
 
 router.route("/users").get(userController.index).post(userController.new);
 
-router.route("/shows").post(userController.addShow);
+router
+  .route("/shows")
+  .get(userController.showIndex)
+  .post(userController.addShow)
+  .delete(userController.removeShow);
 
 router.route("/login").post(userController.login);
 
