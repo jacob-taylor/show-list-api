@@ -7,7 +7,8 @@ const User = require("../models/userModel");
 const jwtSecret = process.env.JWT_SECRET;
 
 exports.index = async (req, res) => {
-  const { token } = req.body;
+  const [bearer, token] = req.headers.authorization.split(" ");
+
   try {
     const data = jwt.verify(token, jwtSecret);
 
@@ -87,7 +88,6 @@ exports.login = async (req, res) => {
 };
 
 exports.showIndex = async (req, res) => {
-  console.log("req.headers", req.headers);
   const [bearer, token] = req.headers.authorization.split(" ");
   try {
     const data = jwt.verify(token, jwtSecret);
@@ -105,15 +105,17 @@ exports.showIndex = async (req, res) => {
 };
 
 exports.addShow = async (req, res) => {
-  const { token, show } = req.body;
+  const [bearer, token] = req.headers.authorization.split(" ");
+
+  const { show } = req.body;
 
   if (!show) {
     return res.status(400).send({ error: "No show was added" });
   }
   try {
-    const data = jwt.verify(token, jwtSecret);
+    const tokenData = jwt.verify(token, jwtSecret);
 
-    const user = await User.findOne({ email: data.email });
+    const user = await User.findOne({ email: tokenData.email });
 
     await user.show_list.push(show);
     await user.save();
@@ -129,12 +131,14 @@ exports.addShow = async (req, res) => {
 };
 
 exports.removeShow = async (req, res) => {
-  const { token, show } = req.body;
+  const [bearer, token] = req.headers.authorization.split(" ");
+
+  const { show } = req.body;
 
   try {
-    const data = jwt.verify(token, jwtSecret);
+    const tokenData = jwt.verify(token, jwtSecret);
 
-    const user = await User.findOne({ email: data.email });
+    const user = await User.findOne({ email: tokenData.email });
 
     const showToRemove = user.show_list.find(
       (s) => s.id.toString() === show.id.toString()
@@ -145,6 +149,51 @@ exports.removeShow = async (req, res) => {
       await user.save();
 
       res.status(200).send({ msg: "Show removed", id: show.id });
+    } else {
+      res.status(400).send({ error: `Show ${show.id} does not exist` });
+    }
+  } catch (error) {
+    if (error.name === "JsonWebTokenError") {
+      res.sendStatus(401); // 401 is unathorized and should log the user out on the client
+    } else {
+      console.log(error.message);
+      res.status(400).send({ error: error.message });
+    }
+  }
+};
+
+exports.editShow = async (req, res) => {
+  const [bearer, token] = req.headers.authorization.split(" ");
+
+  const { show } = req.body;
+
+  try {
+    const tokenData = jwt.verify(token, jwtSecret);
+
+    const user = await User.findOne({ _id: tokenData.id });
+    const showToEdit = user.show_list.find(
+      (s) => s.id.toString() === show.id.toString()
+    );
+
+    if (showToEdit) {
+      const newUser = await User.updateOne(
+        { _id: tokenData.id },
+        {
+          $set: {
+            "show_list.$[s].favorited": show.favorited,
+            "show_list.$[s].watched": show.watched,
+            "show_list.$[s].rating": show.rating,
+            "show_list.$[s].reminder_date": show.reminder_date,
+          },
+        },
+        {
+          arrayFilters: [{ "s._id": showToEdit._id }],
+        }
+      );
+
+      console.log("newUser", newUser);
+
+      res.status(200).send({ msg: "Show edit", id: show.id });
     } else {
       res.status(400).send({ error: `Show ${show.id} does not exist` });
     }
