@@ -176,7 +176,7 @@ exports.editShow = async (req, res) => {
     );
 
     if (showToEdit) {
-      const newUser = await User.updateOne(
+      await User.updateOne(
         { _id: tokenData.id },
         {
           $set: {
@@ -190,8 +190,6 @@ exports.editShow = async (req, res) => {
           arrayFilters: [{ "s._id": showToEdit._id }],
         }
       );
-
-      console.log("newUser", newUser);
 
       res.status(200).send({ msg: "Show edit", id: show.id });
     } else {
