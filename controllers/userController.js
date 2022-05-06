@@ -120,8 +120,13 @@ exports.addShow = async (req, res) => {
     await user.show_list.push(show);
     await user.save();
 
-    res.status(200).send({ msg: "Show added", id: show.id });
+    const newShow = user.show_list.find(
+      (s) => s.id.toString() === show.id.toString()
+    );
+
+    res.status(200).send({ show: newShow });
   } catch (error) {
+    console.log(error);
     if (error.name === "JsonWebTokenError") {
       res.sendStatus(401); // 401 is unathorized and should log the user out on the client
     } else {
@@ -140,9 +145,7 @@ exports.removeShow = async (req, res) => {
 
     const user = await User.findOne({ email: tokenData.email });
 
-    const showToRemove = user.show_list.find(
-      (s) => s.id.toString() === show.id.toString()
-    );
+    const showToRemove = user.show_list.find((s) => s._id.equals(show._id));
 
     if (showToRemove) {
       await user.show_list.pull({ _id: showToRemove._id });
@@ -171,9 +174,8 @@ exports.editShow = async (req, res) => {
     const tokenData = jwt.verify(token, jwtSecret);
 
     const user = await User.findOne({ _id: tokenData.id });
-    const showToEdit = user.show_list.find(
-      (s) => s.id.toString() === show.id.toString()
-    );
+
+    const showToEdit = user.show_list.find((s) => s._id.equals(show._id));
 
     if (showToEdit) {
       await User.updateOne(
@@ -190,11 +192,43 @@ exports.editShow = async (req, res) => {
           arrayFilters: [{ "s._id": showToEdit._id }],
         }
       );
+      const editedUser = await User.findOne({ _id: tokenData.id });
 
-      res.status(200).send({ msg: "Show edit", id: show.id });
+      const editedShow = editedUser.show_list.find((s) =>
+        s._id.equals(showToEdit._id)
+      );
+
+      res.status(200).send({ show: editedShow });
     } else {
-      res.status(400).send({ error: `Show ${show.id} does not exist` });
+      res.status(400).send({ error: `Show ${show._id} does not exist` });
     }
+  } catch (error) {
+    console.log(error);
+    if (error.name === "JsonWebTokenError") {
+      res.sendStatus(401); // 401 is unathorized and should log the user out on the client
+    } else {
+      console.log(error.message);
+      res.status(400).send({ error: error.message });
+    }
+  }
+};
+
+// DEV ONLY
+exports.showNuke = async (req, res) => {
+  const [bearer, token] = req.headers.authorization.split(" ");
+
+  try {
+    const tokenData = jwt.verify(token, jwtSecret);
+
+    await User.findByIdAndUpdate(
+      { _id: tokenData.id },
+      {
+        $set: {
+          show_list: [],
+        },
+      }
+    );
+    res.sendStatus(200);
   } catch (error) {
     if (error.name === "JsonWebTokenError") {
       res.sendStatus(401); // 401 is unathorized and should log the user out on the client
