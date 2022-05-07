@@ -17,7 +17,6 @@ const userModel = mongoose.Schema({
       rating: Number,
     },
   ],
-  favorites: [{ show_id: Number }],
   push_notifications: { type: Boolean },
   push_token: { type: String },
   streaming_services: [

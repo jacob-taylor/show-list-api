@@ -3,7 +3,11 @@ const router = express.Router();
 
 const userController = require("../controllers/userController");
 
-router.route("/users").get(userController.index).post(userController.new);
+router
+  .route("/users")
+  .get(userController.index)
+  .post(userController.new)
+  .patch(userController.edit);
 
 router
   .route("/shows")
