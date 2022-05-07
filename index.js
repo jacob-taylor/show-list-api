@@ -68,7 +68,7 @@ app.get("/push", async (req, res) => {
     res.json({
       serverTimestamp: timeStamp,
       savedTimeStampToUTC: reminderTimestamp,
-      serverTimezoneOffect: date.getTimezoneOffset(),
+      reminderDate,
     });
   } else {
     res.sendStatus(401);
