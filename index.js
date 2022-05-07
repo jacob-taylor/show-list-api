@@ -59,11 +59,10 @@ app.get("/push", async (req, res) => {
     const date = getDateWithNoTime();
     const timeStamp = date.getTime();
 
-    const reminderDate = new Date(
-      Date.parse(usersWithPushTokens[0].show_list[0].reminder_date)
+    const reminderTimestamp = Date.parse(
+      usersWithPushTokens[0].show_list[0].reminder_date
     );
-    const reminderTimestamp =
-      reminderDate.getTime() + reminderDate.getTimezoneOffset() * 60000;
+
     res.json({
       serverTimestamp: timeStamp,
       savedTimeStampToUTC: reminderTimestamp,
