@@ -6,6 +6,7 @@ var mongoose = require("mongoose");
 
 const userRoutes = require("./routes/userRouter");
 const User = require("./models/userModel");
+const { getDateWithNoTime } = require("./utils");
 
 const PUSH_SECRET = process.env.PUSH_SECRET;
 
@@ -34,11 +35,12 @@ app.use("/api", userRoutes);
 
 app.get("/push", async (req, res) => {
   const [bearer, pushSecret] = req.headers.authorization.split(" ");
-  console.log("pushSecret", pushSecret);
-  console.log("PUSH_SECRET", PUSH_SECRET);
+
   if (PUSH_SECRET === pushSecret) {
     const users = await User.find({}).lean();
-    const usersWithPushTokens = users.filter((u) => u.push_token);
+    const usersWithPushTokens = users.filter(
+      (u) => u.push_token && u.push_notifications
+    );
 
     // // Push Token identifies the device with the Expo App installed
     // const pushToken = "ExponentPushToken[zDJUxbDajadxbnz5bk7Yv2]";
@@ -54,7 +56,18 @@ app.get("/push", async (req, res) => {
     //   // Send the notification to the phone
     //   expo.sendPushNotificationsAsync([message]);
     // }
-    res.json(usersWithPushTokens);
+    const date = getDateWithNoTime();
+    const timeStamp = date.getTime();
+
+    const reminderDate = new Date(
+      Date.parse(usersWithPushTokens[0].show_list[0].reminder_date)
+    );
+    const reminderTimestamp =
+      reminderDate.getTime() + reminderDate.getTimezoneOffset() * 60000;
+    res.json({
+      serverTimestamp: timeStamp,
+      savedTimeStampToUTC: reminderTimestamp,
+    });
   } else {
     res.sendStatus(401);
   }
