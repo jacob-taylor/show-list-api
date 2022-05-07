@@ -7,7 +7,7 @@ var mongoose = require("mongoose");
 const userRoutes = require("./routes/userRouter");
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 80;
 
 const mongoDB = process.env.MONGO_CONNECTION_STRING;
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
