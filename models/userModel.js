@@ -12,7 +12,7 @@ const userModel = mongoose.Schema({
       title: String,
       date: String,
       favorited: Boolean,
-      reminder_date: Number,
+      reminder_date: Date,
       watched: Boolean,
       rating: Number,
     },
