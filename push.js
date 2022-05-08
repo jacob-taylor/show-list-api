@@ -43,9 +43,10 @@ const pushNotifications = async () => {
       }
     }
 
+    console.log(messages);
+
     const chunks = expo.chunkPushNotifications(messages);
     const tickets = [];
-
     for (const chunk of chunks) {
       try {
         const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
@@ -59,6 +60,7 @@ const pushNotifications = async () => {
         console.error(error);
       }
     }
+    console.log(tickets);
   } catch (err) {
     console.log(err);
   }
