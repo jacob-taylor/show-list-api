@@ -50,6 +50,8 @@ app.get("/push", async (req, res) => {
     for (const user of usersWithPushTokens) {
       for (const show of user.show_list) {
         // TODAYS THE DAY!
+        console.log("show.reminder_date", show.reminder_date);
+        console.log("currentDayTimestamp", currentDayTimestamp);
         if (show.reminder_date === currentDayTimestamp) {
           // Create push message
           messages.push({
