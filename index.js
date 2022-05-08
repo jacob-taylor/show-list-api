@@ -49,12 +49,6 @@ app.get("/push", async (req, res) => {
 
     for (const user of usersWithPushTokens) {
       for (const show of user.show_list) {
-        // TODAYS THE DAY!
-        console.log(
-          "show.reminder_date",
-          getDateWithNoTime(show.reminder_date).getTime()
-        );
-        console.log("currentDayTimestamp", currentDayTimestamp);
         if (
           getDateWithNoTime(show.reminder_date).getTime() ===
           currentDayTimestamp
@@ -68,20 +62,22 @@ app.get("/push", async (req, res) => {
       }
     }
 
-    // // Push Token identifies the device with the Expo App installed
-    // const pushToken = "ExponentPushToken[zDJUxbDajadxbnz5bk7Yv2]";
-    // // Conditional makes sure the pushToken is formatted properly
-    // if (Expo.isExpoPushToken(pushToken)) {
-    //   // Message data that is going to be sent to the phone
-    //   const message = {
-    //     to: pushToken,
-    //     sound: "default",
-    //     body: "Dr Strange - In Theatres May 5th",
-    //     data: { withSome: "data" },
-    //   };
-    //   // Send the notification to the phone
-    //   expo.sendPushNotificationsAsync([message]);
-    // }
+    const chunks = expo.chunkPushNotifications(messages);
+    const tickets = [];
+
+    for (const chunk of chunks) {
+      try {
+        const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+        console.log(ticketChunk);
+        tickets.push(...ticketChunk);
+        // NOTE: If a ticket contains an error code in ticket.details.error, you
+        // must handle it appropriately. The error codes are listed in the Expo
+        // documentation:
+        // https://docs.expo.io/push-notifications/sending-notifications/#individual-errors
+      } catch (error) {
+        console.error(error);
+      }
+    }
 
     res.json(messages);
   } else {
