@@ -43,14 +43,11 @@ const pushNotifications = async () => {
       }
     }
 
-    console.log(messages);
-
     const chunks = expo.chunkPushNotifications(messages);
     const tickets = [];
     for (const chunk of chunks) {
       try {
         const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-        console.log(ticketChunk);
         tickets.push(...ticketChunk);
         // NOTE: If a ticket contains an error code in ticket.details.error, you
         // must handle it appropriately. The error codes are listed in the Expo
