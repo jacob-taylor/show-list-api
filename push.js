@@ -31,6 +31,10 @@ const pushNotifications = async () => {
 
     for (const user of usersWithPushTokens) {
       for (const show of user.show_list) {
+        console.log(
+          "show reminder timestamp",
+          getDateWithNoTime(show.reminder_date).getTime()
+        );
         if (
           getDateWithNoTime(show.reminder_date).getTime() ===
           currentDayTimestamp
