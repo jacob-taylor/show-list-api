@@ -20,6 +20,7 @@ const expo = new Expo();
 const pushNotifications = async () => {
   const date = getDateWithNoTime();
   const currentDayTimestamp = date.getTime();
+  console.log("currentDayTimestamp", currentDayTimestamp);
   try {
     const users = await User.find({}).lean();
     const usersWithPushTokens = users.filter(
