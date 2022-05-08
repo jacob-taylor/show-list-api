@@ -37,10 +37,28 @@ app.get("/push", async (req, res) => {
   const [bearer, pushSecret] = req.headers.authorization.split(" ");
 
   if (PUSH_SECRET === pushSecret) {
+    const date = getDateWithNoTime();
+    const currentDayTimestamp = date.getTime();
+
     const users = await User.find({}).lean();
     const usersWithPushTokens = users.filter(
       (u) => u.push_token && u.push_notifications
     );
+
+    let messages = [];
+
+    for (const user of usersWithPushTokens) {
+      for (const show of user.show_list) {
+        // TODAYS THE DAY!
+        if (show.reminder_date === currentDayTimestamp) {
+          // Create push message
+          messages.push({
+            to: user.push_token,
+            body: `Don't forget to watch ${show.title} today!`,
+          });
+        }
+      }
+    }
 
     // // Push Token identifies the device with the Expo App installed
     // const pushToken = "ExponentPushToken[zDJUxbDajadxbnz5bk7Yv2]";
@@ -56,20 +74,8 @@ app.get("/push", async (req, res) => {
     //   // Send the notification to the phone
     //   expo.sendPushNotificationsAsync([message]);
     // }
-    const date = getDateWithNoTime();
-    const timeStamp = date.getTime();
 
-    const reminderDate = new Date(
-      Date.parse(usersWithPushTokens[0].show_list[0].reminder_date)
-    );
-    const reminderTimestamp =
-      reminderDate.getTime() - reminderDate.getTimezoneOffset() * 60000;
-
-    res.json({
-      serverTimestamp: timeStamp,
-      savedTimeStampToUTC: reminderTimestamp,
-      reminderDate,
-    });
+    res.json(messages);
   } else {
     res.sendStatus(401);
   }
