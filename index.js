@@ -29,7 +29,7 @@ app.use(express.static(__dirname + "/views"));
 app.use(bodyParser.json());
 app.use("/api", routes);
 
-app.get("/", (req, res) => {
+app.get("/share", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "redirect.html"));
 });
 

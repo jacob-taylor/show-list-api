@@ -1,13 +1,19 @@
 (function () {
   var app = {
     launchApp: function () {
-      console.log(this);
+      var params = new URL(document.location).searchParams;
+      var showId = params.get("id");
+      var media = params.get("media");
+
       var OS = this.getMobileOperatingSystem();
       var deeplink =
         // TODO: Update links when builds are deployed
         OS === "android"
-          ? "exp://192.168.1.11:19000"
-          : "exp://192.168.1.11:19000";
+          ? "exp://192.168.1.11:19000/--/info?showId="
+          : "exp://192.168.1.11:19000/--/info?showId=" +
+            showId +
+            "&media=" +
+            media;
 
       window.location.replace(deeplink);
       this.timer = setTimeout(
