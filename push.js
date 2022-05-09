@@ -3,7 +3,11 @@ require("dotenv").config();
 var mongoose = require("mongoose");
 const { Expo } = require("expo-server-sdk");
 
-const { getDateWithNoTime, getDateWithHour } = require("./utils");
+const {
+  getDateWithNoTime,
+  getDateWithHour,
+  subtractHours,
+} = require("./utils");
 const User = require("./models/userModel");
 
 const mongoDB = process.env.MONGO_CONNECTION_STRING;
