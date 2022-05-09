@@ -3,7 +3,7 @@ require("dotenv").config();
 var mongoose = require("mongoose");
 const { Expo } = require("expo-server-sdk");
 
-const { getDateWithNoTime } = require("./utils");
+const { getDateWithNoTime, getDateWithHour } = require("./utils");
 const User = require("./models/userModel");
 
 const mongoDB = process.env.MONGO_CONNECTION_STRING;
@@ -18,9 +18,8 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 const expo = new Expo();
 
 const pushNotifications = async () => {
-  const date = getDateWithNoTime();
-  const currentDayTimestamp = date.getTime();
-  console.log("currentDayTimestamp", currentDayTimestamp);
+  const dateWithHour = getDateWithHour();
+
   try {
     const users = await User.find({}).lean();
     const usersWithPushTokens = users.filter(
@@ -32,9 +31,24 @@ const pushNotifications = async () => {
     for (const user of usersWithPushTokens) {
       for (const show of user.show_list) {
         console.log(
-          "show reminder timestamp",
+          "show.reminder_date.getHours()",
+          show.reminder_date.getHours()
+        );
+
+        const dateMinusHours = subtractHours(
+          show.reminder_date.getHours(),
+          dateWithHour
+        );
+
+        const dateWithNoTime = getDateWithNoTime(dateMinusHours);
+        const currentDayTimestamp = dateWithNoTime.getTime();
+
+        console.log("currentDayTimestamp", currentDayTimestamp);
+        console.log(
+          "show.reminder_date timestamp",
           getDateWithNoTime(show.reminder_date).getTime()
         );
+
         if (
           getDateWithNoTime(show.reminder_date).getTime() ===
           currentDayTimestamp
