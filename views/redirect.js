@@ -9,8 +9,8 @@
       var deeplink =
         // TODO: Update links when builds are deployed
         OS === "android"
-          ? "exp://192.168.1.11:19000/--/info?showId="
-          : "exp://192.168.1.11:19000/--/info?showId=" +
+          ? "exp://exp.host/@redsky-innovations/show-list/--/info?showId="
+          : "exp://exp.host/@redsky-innovations/show-list/--/info?showId=" +
             showId +
             "&media=" +
             media;
