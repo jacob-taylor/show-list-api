@@ -16,8 +16,6 @@ router
   .patch(userController.editShow)
   .delete(userController.removeShow);
 
-router.route("/nuke-shows").get(userController.showNuke);
-
 router.route("/login").post(userController.login);
 
 module.exports = router;

@@ -243,29 +243,3 @@ exports.editShow = async (req, res) => {
     }
   }
 };
-
-// DEV ONLY
-exports.showNuke = async (req, res) => {
-  const [bearer, token] = req.headers.authorization.split(" ");
-
-  try {
-    const tokenData = jwt.verify(token, jwtSecret);
-
-    await User.findByIdAndUpdate(
-      { _id: tokenData.id },
-      {
-        $set: {
-          show_list: [],
-        },
-      }
-    );
-    res.sendStatus(200);
-  } catch (error) {
-    if (error.name === "JsonWebTokenError") {
-      res.sendStatus(401); // 401 is unathorized and should log the user out on the client
-    } else {
-      console.log(error.message);
-      res.status(400).send({ error: error.message });
-    }
-  }
-};
