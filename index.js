@@ -2,6 +2,7 @@ require("dotenv").config();
 const bodyParser = require("body-parser");
 const express = require("express");
 var mongoose = require("mongoose");
+const path = require("path");
 
 const routes = require("./routes");
 
@@ -23,8 +24,14 @@ app.use(
   })
 );
 
+app.use(express.static(__dirname + "/views"));
+
 app.use(bodyParser.json());
 app.use("/api", routes);
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "views", "redirect.html"));
+});
 
 app.listen(port, () => {
   console.log(`Show list API listening on port ${port}`);
