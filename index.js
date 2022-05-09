@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const express = require("express");
 var mongoose = require("mongoose");
 
-const userRoutes = require("./routes/userRouter");
+const routes = require("./routes");
 
 const app = express();
 const port = process.env.PORT || 80;
@@ -24,7 +24,7 @@ app.use(
 );
 
 app.use(bodyParser.json());
-app.use("/api", userRoutes);
+app.use("/api", routes);
 
 app.listen(port, () => {
   console.log(`Show list API listening on port ${port}`);

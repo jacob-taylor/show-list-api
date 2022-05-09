@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
-const userController = require("../controllers/userController");
+const userController = require("./controllers/userController");
+const showController = require("./controllers/showController");
 
 router
   .route("/users")
@@ -11,10 +12,10 @@ router
 
 router
   .route("/shows")
-  .get(userController.showIndex)
-  .post(userController.addShow)
-  .patch(userController.editShow)
-  .delete(userController.removeShow);
+  .get(showController.index)
+  .post(showController.add)
+  .patch(showController.edit)
+  .delete(showController.remove);
 
 router.route("/login").post(userController.login);
 
