@@ -27,6 +27,22 @@ exports.index = async (req, res) => {
   }
 };
 
+exports.all = async (req, res) => {
+  try {
+    const [bearer, token] = req.headers.authorization.split(" ");
+
+    if (token === jwtSecret) {
+      const users = await User.find();
+
+      res.json({ users });
+    } else {
+      res.sendStatus(401);
+    }
+  } catch (error) {
+    res.status(500).send({ error });
+  }
+};
+
 exports.new = async (req, res) => {
   const user = new User();
   const { email, password } = req.body;

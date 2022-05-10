@@ -10,6 +10,8 @@ router
   .post(userController.new)
   .patch(userController.edit);
 
+router.route("/users/all").get(userController.all);
+
 router
   .route("/shows")
   .get(showController.index)
