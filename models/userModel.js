@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const userModel = mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password_hash: { type: String, required: true },
+  reset_password_code: { type: Number },
   show_list: [
     {
       id: Number,

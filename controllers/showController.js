@@ -6,8 +6,8 @@ const User = require("../models/userModel");
 const jwtSecret = process.env.JWT_SECRET;
 
 exports.index = async (req, res) => {
-  const [bearer, token] = req.headers.authorization.split(" ");
   try {
+    const [bearer, token] = req.headers.authorization.split(" ");
     const data = jwt.verify(token, jwtSecret);
 
     const user = await User.findOne({ email: data.email });
@@ -23,14 +23,14 @@ exports.index = async (req, res) => {
 };
 
 exports.add = async (req, res) => {
-  const [bearer, token] = req.headers.authorization.split(" ");
-
-  const { show } = req.body;
-
-  if (!show) {
-    return res.status(400).send({ error: "No show was added" });
-  }
   try {
+    const [bearer, token] = req.headers.authorization.split(" ");
+
+    const { show } = req.body;
+
+    if (!show) {
+      return res.status(400).send({ error: "No show was added" });
+    }
     const tokenData = jwt.verify(token, jwtSecret);
 
     const user = await User.findOne({ email: tokenData.email });
@@ -47,17 +47,17 @@ exports.add = async (req, res) => {
     if (error.name === "JsonWebTokenError") {
       res.sendStatus(401); // 401 is unathorized and should log the user out on the client
     } else {
-      res.status(400).send({ error });
+      res.status(400).send({ error: error?.message });
     }
   }
 };
 
 exports.remove = async (req, res) => {
-  const [bearer, token] = req.headers.authorization.split(" ");
-
-  const { show } = req.body;
-
   try {
+    const [bearer, token] = req.headers.authorization.split(" ");
+
+    const { show } = req.body;
+
     const tokenData = jwt.verify(token, jwtSecret);
 
     const user = await User.findOne({ email: tokenData.email });
@@ -83,11 +83,11 @@ exports.remove = async (req, res) => {
 };
 
 exports.edit = async (req, res) => {
-  const [bearer, token] = req.headers.authorization.split(" ");
-
-  const { show } = req.body;
-
   try {
+    const [bearer, token] = req.headers.authorization.split(" ");
+
+    const { show } = req.body;
+
     const tokenData = jwt.verify(token, jwtSecret);
 
     const user = await User.findOne({ _id: tokenData.id });

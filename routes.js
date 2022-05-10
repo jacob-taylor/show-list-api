@@ -20,5 +20,8 @@ router
   .delete(showController.remove);
 
 router.route("/login").post(userController.login);
+router.route("/reset").post(userController.reset);
+router.route("/code").post(userController.code);
+router.route("/password").post(userController.password);
 
 module.exports = router;
