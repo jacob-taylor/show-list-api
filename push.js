@@ -34,34 +34,36 @@ const pushNotifications = async () => {
 
     for (const user of usersWithPushTokens) {
       for (const show of user.show_list) {
-        console.log(
-          "show.reminder_date.getHours()",
-          show.reminder_date.getHours()
-        );
+        if (show.reminder_date) {
+          console.log(
+            "show.reminder_date.getHours()",
+            show.reminder_date.getHours()
+          );
 
-        const dateMinusHours = subtractHours(
-          show.reminder_date.getHours(),
-          dateWithHour
-        );
+          const dateMinusHours = subtractHours(
+            show.reminder_date.getHours(),
+            dateWithHour
+          );
 
-        const dateWithNoTime = getDateWithNoTime(dateMinusHours);
-        const currentDayTimestamp = dateWithNoTime.getTime();
+          const dateWithNoTime = getDateWithNoTime(dateMinusHours);
+          const currentDayTimestamp = dateWithNoTime.getTime();
 
-        console.log("currentDayTimestamp", currentDayTimestamp);
-        console.log(
-          "show.reminder_date timestamp",
-          getDateWithNoTime(show.reminder_date).getTime()
-        );
+          console.log("currentDayTimestamp", currentDayTimestamp);
+          console.log(
+            "show.reminder_date timestamp",
+            getDateWithNoTime(show.reminder_date).getTime()
+          );
 
-        if (
-          getDateWithNoTime(show.reminder_date).getTime() ===
-          currentDayTimestamp
-        ) {
-          // Create push message
-          messages.push({
-            to: user.push_token,
-            body: `Don't forget to watch ${show.title} today!`,
-          });
+          if (
+            getDateWithNoTime(show.reminder_date).getTime() ===
+            currentDayTimestamp
+          ) {
+            // Create push message
+            messages.push({
+              to: user.push_token,
+              body: `Don't forget to watch ${show.title} today!`,
+            });
+          }
         }
       }
     }
