@@ -70,7 +70,6 @@ exports.new = async (req, res) => {
 
     return res.json({ token, user: newUser });
   } catch (error) {
-    console.log("Error creating user", error);
     if (error?.code === 11000) {
       return res.status(400).send({ error: "User already exists" });
     }
@@ -133,23 +132,19 @@ exports.reset = async (req, res) => {
         }
       );
 
-      await mg.messages.create(
-        "sandbox91a3c218fa1a4fe6a5c44e86c626fb59.mailgun.org",
-        {
-          from: "No Reply <no-reply@thelistnow.com>",
-          to: ["bryan87reed@gmail.com"],
-          subject: "Reset Password Code",
-          html: `<div>Please use this code to reset your password: <b>${code}</b></div>`,
-        }
-      );
+      await mg.messages.create("thelistnow.com", {
+        from: "No Reply <no-reply@thelistnow.com>",
+        to: [email],
+        subject: "Reset Password Code",
+        html: `<div>Please use this code to reset your password: <b>${code}</b></div>`,
+      });
 
       res.status(200).send({ msg: "User found, code sent" });
     } else {
       res.status(400).send({ msg: "No user found with that email address" });
     }
   } catch (error) {
-    console.log("error", error);
-    res.status(500).send({ error: error.message });
+    res.status(500).send({ msg: error.message });
   }
 };
 
@@ -164,7 +159,7 @@ exports.code = async (req, res) => {
       res.status(400).send({ msg: "Code not valid" });
     }
   } catch (error) {
-    res.status(500).send({ error: error.message });
+    res.status(500).send({ msg: error.message });
   }
 };
 
@@ -173,7 +168,7 @@ exports.password = async (req, res) => {
     const { email, password, code } = req.body;
     const user = await User.findOne({ email });
 
-    if (user && user.reset_password_code === code) {
+    if (user && user.reset_password_code === Number(code)) {
       const passwordHash = await bcrypt.hash(password, 10);
 
       await User.updateOne(
@@ -191,7 +186,7 @@ exports.password = async (req, res) => {
       res.status(400).send({ msg: "User not valid" });
     }
   } catch (error) {
-    res.status(500).send({ error: error.message });
+    res.status(500).send({ msg: error.message });
   }
 };
 
@@ -217,11 +212,9 @@ exports.edit = async (req, res) => {
 
     res.status(200).send({ editedUser });
   } catch (error) {
-    console.log(error);
     if (error.name === "JsonWebTokenError") {
       res.sendStatus(401); // 401 is unathorized and should log the user out on the client
     } else {
-      console.log(error.message);
       res.status(400).send({ error: error.message });
     }
   }
