@@ -33,6 +33,14 @@ app.get("/share", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "redirect.html"));
 });
 
+app.get("/privacy", (req, res) => {
+  res.sendFile(path.join(__dirname, "views", "privacy.html"));
+});
+
+app.get("/contact", (req, res) => {
+  res.sendFile(path.join(__dirname, "views", "contact.html"));
+});
+
 app.listen(port, () => {
   console.log(`Show list API listening on port ${port}`);
 });
