@@ -9,8 +9,8 @@
       var deeplink =
         // TODO: Update links when builds are deployed
         OS === "android"
-          ? "exp://exp.host/@redsky-innovations/show-list/--/info?showId="
-          : "exp://exp.host/@redsky-innovations/show-list/--/info?showId=" +
+          ? "com.now.thelist://info?showId="
+          : "exp://exp.host/@the-list-group/the-list/--/info?showId=" +
             showId +
             "&media=" +
             media;
@@ -26,7 +26,7 @@
     openWebApp: function (OS) {
       var appStoreLink =
         OS === "android"
-          ? "https://play.google.com/console/about/"
+          ? "https://play.google.com/store/apps/details?id=com.now.thelist"
           : "https://developer.apple.com/";
       window.location.replace(appStoreLink);
     },
