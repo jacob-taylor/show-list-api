@@ -7,13 +7,7 @@
 
       var OS = this.getMobileOperatingSystem();
       var deeplink =
-        // TODO: Update links when builds are deployed
-        OS === "android"
-          ? "com.now.thelist://info?showId="
-          : "exp://exp.host/@the-list-group/the-list/--/info?showId=" +
-            showId +
-            "&media=" +
-            media;
+        "com.now.thelist://share/info?showId=" + showId + "&media=" + media;
 
       window.location.replace(deeplink);
       this.timer = setTimeout(
@@ -27,7 +21,7 @@
       var appStoreLink =
         OS === "android"
           ? "https://play.google.com/store/apps/details?id=com.now.thelist"
-          : "https://developer.apple.com/";
+          : "https://apps.apple.com/us/app/1624143620";
       window.location.replace(appStoreLink);
     },
     getMobileOperatingSystem: function () {
