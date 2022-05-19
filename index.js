@@ -25,6 +25,7 @@ app.use(
 );
 
 app.use(express.static(__dirname + "/views"));
+app.use(express.static(__dirname + "/assets"));
 
 app.use(bodyParser.json());
 app.use("/api", routes);
