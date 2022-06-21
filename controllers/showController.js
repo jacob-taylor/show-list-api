@@ -144,7 +144,6 @@ exports.editOrder = async (req, res) => {
     const tokenData = jwt.verify(token, jwtSecret);
 
     const updatePromises = shows.map((show) => {
-      console.log("show", show);
       return User.updateOne(
         { _id: tokenData.id },
         {
