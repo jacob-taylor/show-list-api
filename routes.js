@@ -19,6 +19,8 @@ router
   .patch(showController.edit)
   .delete(showController.remove);
 
+router.route("/shows/order").patch(showController.editOrder);
+
 router.route("/login").post(userController.login);
 router.route("/reset").post(userController.reset);
 router.route("/code").post(userController.code);

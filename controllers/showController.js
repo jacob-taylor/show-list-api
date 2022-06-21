@@ -35,7 +35,12 @@ exports.add = async (req, res) => {
 
     const user = await User.findOne({ email: tokenData.email });
 
-    await user.show_list.push(show);
+    // Gets the last index of the media_type list for order
+    const order = user.show_list.filter(
+      (s) => s.media_type === show.media_type
+    ).length;
+
+    await user.show_list.push({ ...show, order });
     await user.save();
 
     const newShow = user.show_list.find(
@@ -119,6 +124,47 @@ exports.edit = async (req, res) => {
     } else {
       res.status(400).send({ error: `Show ${show._id} does not exist` });
     }
+  } catch (error) {
+    console.log(error);
+    if (error.name === "JsonWebTokenError") {
+      res.sendStatus(401); // 401 is unathorized and should log the user out on the client
+    } else {
+      console.log(error.message);
+      res.status(400).send({ error: error.message });
+    }
+  }
+};
+
+exports.editOrder = async (req, res) => {
+  try {
+    const [bearer, token] = req.headers.authorization.split(" ");
+
+    const { shows } = req.body; // {_id: "", order: 0}
+
+    const tokenData = jwt.verify(token, jwtSecret);
+
+    const updatePromises = shows.map((show) => {
+      console.log("show", show);
+      return User.updateOne(
+        { _id: tokenData.id },
+        {
+          $set: {
+            "show_list.$[s].order": show.order,
+          },
+        },
+        {
+          arrayFilters: [{ "s._id": show._id }],
+        }
+      );
+    });
+
+    await Promise.all(updatePromises);
+
+    const user = await User.findOne({ _id: tokenData.id });
+
+    const updatedShows = user.show_list;
+
+    res.status(200).send({ shows: updatedShows });
   } catch (error) {
     console.log(error);
     if (error.name === "JsonWebTokenError") {

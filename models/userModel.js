@@ -16,6 +16,7 @@ const userModel = mongoose.Schema({
       reminder_date: Date,
       watched: Boolean,
       rating: Number,
+      order: Number,
     },
   ],
   push_notifications: { type: Boolean },
