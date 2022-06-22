@@ -3,11 +3,6 @@ require("dotenv").config();
 var mongoose = require("mongoose");
 const { Expo } = require("expo-server-sdk");
 
-const {
-  getDateWithNoTime,
-  getDateWithHour,
-  subtractHours,
-} = require("./utils");
 const User = require("./models/userModel");
 
 const mongoDB = process.env.MONGO_CONNECTION_STRING;
@@ -21,73 +16,39 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
 const expo = new Expo();
 
-const pushNotifications = async () => {
-  const dateWithHour = getDateWithHour();
-
+exports.sendPushNotification = async (userId, showId) => {
   try {
-    const users = await User.find({}).lean();
-    const usersWithPushTokens = users.filter(
-      (u) => u.push_token && u.push_notifications
-    );
+    const user = await User.findById(userId);
+    const show = await user.show_list.find((s) => s._id.equals(showId));
 
     let messages = [];
 
-    for (const user of usersWithPushTokens) {
-      for (const show of user.show_list) {
-        if (show.reminder_date) {
-          console.log(
-            "show.reminder_date.getHours()",
-            show.reminder_date.getHours()
-          );
+    if (user.push_token) {
+      // Create push message
+      messages.push({
+        to: user.push_token,
+        body: `Don't forget to watch ${show.title} today!`,
+      });
+    }
 
-          const dateMinusHours = subtractHours(
-            show.reminder_date.getHours(),
-            dateWithHour
-          );
-
-          const dateWithNoTime = getDateWithNoTime(dateMinusHours);
-          const currentDayTimestamp = dateWithNoTime.getTime();
-
-          console.log("currentDayTimestamp", currentDayTimestamp);
-          console.log(
-            "show.reminder_date timestamp",
-            getDateWithNoTime(show.reminder_date).getTime()
-          );
-
-          if (
-            getDateWithNoTime(show.reminder_date).getTime() ===
-            currentDayTimestamp
-          ) {
-            // Create push message
-            messages.push({
-              to: user.push_token,
-              body: `Don't forget to watch ${show.title} today!`,
-            });
-          }
+    if (messages.length > 0) {
+      const chunks = expo.chunkPushNotifications(messages);
+      const tickets = [];
+      for (const chunk of chunks) {
+        try {
+          const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+          tickets.push(...ticketChunk);
+          // NOTE: If a ticket contains an error code in ticket.details.error, you
+          // must handle it appropriately. The error codes are listed in the Expo
+          // documentation:
+          // https://docs.expo.io/push-notifications/sending-notifications/#individual-errors
+        } catch (error) {
+          console.error(error);
         }
       }
+      console.log(tickets);
     }
-
-    const chunks = expo.chunkPushNotifications(messages);
-    const tickets = [];
-    for (const chunk of chunks) {
-      try {
-        const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-        tickets.push(...ticketChunk);
-        // NOTE: If a ticket contains an error code in ticket.details.error, you
-        // must handle it appropriately. The error codes are listed in the Expo
-        // documentation:
-        // https://docs.expo.io/push-notifications/sending-notifications/#individual-errors
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    console.log(tickets);
   } catch (err) {
     console.log(err);
   }
 };
-
-pushNotifications().finally(() => {
-  process.exit();
-});

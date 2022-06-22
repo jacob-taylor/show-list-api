@@ -1,7 +1,9 @@
 require("dotenv").config();
+const schedule = require("node-schedule");
 const jwt = require("jsonwebtoken");
 
 const User = require("../models/userModel");
+const { sendPushNotification } = require("../push");
 
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -107,6 +109,50 @@ exports.edit = async (req, res) => {
             "show_list.$[s].favorited": show.favorited,
             "show_list.$[s].watched": show.watched,
             "show_list.$[s].rating": show.rating,
+          },
+        },
+        {
+          arrayFilters: [{ "s._id": showToEdit._id }],
+        }
+      );
+      const editedUser = await User.findOne({ _id: tokenData.id });
+
+      const editedShow = editedUser.show_list.find((s) =>
+        s._id.equals(showToEdit._id)
+      );
+
+      res.status(200).send({ show: editedShow });
+    } else {
+      res.status(400).send({ error: `Show ${show._id} does not exist` });
+    }
+  } catch (error) {
+    console.log(error);
+    if (error.name === "JsonWebTokenError") {
+      res.sendStatus(401); // 401 is unathorized and should log the user out on the client
+    } else {
+      console.log(error.message);
+      res.status(400).send({ error: error.message });
+    }
+  }
+};
+
+exports.editReminder = async (req, res) => {
+  try {
+    const [bearer, token] = req.headers.authorization.split(" ");
+
+    const { show } = req.body;
+
+    const tokenData = jwt.verify(token, jwtSecret);
+
+    const user = await User.findOne({ _id: tokenData.id });
+
+    const showToEdit = user.show_list.find((s) => s._id.equals(show._id));
+
+    if (showToEdit) {
+      await User.updateOne(
+        { _id: tokenData.id },
+        {
+          $set: {
             "show_list.$[s].reminder_date": show.reminder_date,
           },
         },
@@ -114,6 +160,13 @@ exports.edit = async (req, res) => {
           arrayFilters: [{ "s._id": showToEdit._id }],
         }
       );
+
+      // Schedules push notification
+      schedule.scheduleJob(
+        new Date(show.reminder_date),
+        sendPushNotification.bind(null, user._id, show._id)
+      );
+
       const editedUser = await User.findOne({ _id: tokenData.id });
 
       const editedShow = editedUser.show_list.find((s) =>
